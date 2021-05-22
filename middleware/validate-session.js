@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { users } = require('../controllers/usercontroller');
+const { User } = require('../controllers/usercontroller');
 
 module.exports = function (req, res, next) {
     if (req.method == 'OPTIONS') {
@@ -11,7 +11,7 @@ module.exports = function (req, res, next) {
         else {
             jwt.verify(sessionToken, 'lets_play_sum_games_man', (err, decoded) => {
                 if (decoded) {
-                    users.findOne({ where: { id: decoded.id } }).then(user => {
+                    User.findOne({ where: { id: decoded.id } }).then(user => {
                         req.user = user;
                         console.log(`user: ${user}`)
                         next()
