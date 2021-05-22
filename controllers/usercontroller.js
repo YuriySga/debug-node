@@ -1,14 +1,16 @@
-var router = Router();
-var bcrypt = require('bcrypt');
-var jwt = require('jsonwebtoken');
+const { Router } = require('express');
+const bcrypt = require('bcryptjs');
 
-var User = require('../db').import('../models/user');
+const router = Router();
+const jwt = require('jsonwebtoken');
 
-router.post('/signup', (req, res) => {
+const User = new require('../models/user')(require('./../db'), require('sequelize'));
+
+router.post('/signup', async (req, res) => {
     User.create({
         full_name: req.body.user.full_name,
         username: req.body.user.username,
-        passwordhash: bcrypt.hashSync(req.body.user.password, 10),
+        passwordHash: bcrypt.hashSync(req.body.user.password, 8),
         email: req.body.user.email,
     })
         .then(
@@ -31,7 +33,7 @@ router.post('/signin', (req, res) => {
         if (user) {
             bcrypt.compare(req.body.user.password, user.passwordHash, function (err, matches) {
                 if (matches) {
-                    var token = jwt.sign({ id: user.id }, 'lets_play_sum_games_man', { expiresIn: 60 * 60 * 24 });
+                    const token = jwt.sign({ id: user.id }, 'lets_play_sum_games_man', { expiresIn: 60 * 60 * 24 });
                     res.json({
                         user: user,
                         message: "Successfully authenticated.",
@@ -48,4 +50,4 @@ router.post('/signin', (req, res) => {
     })
 })
 
-module.exports = router;
+module.exports = {router, User};

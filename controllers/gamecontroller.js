@@ -1,12 +1,14 @@
-var router = require('express').Router();
-var Game = require('../db').import('../models/game');
+const { Router } = require('express');
+const validateSession = require('../middleware/validate-session');
+const router = Router();
+const Games = new require('../models/game')(require('./../db'), require('sequelize'));
 
-router.get('/all', (req, res) => {
-    Game.findAll({ where: { owner_id: req.user.id } })
+router.get('/all/:id', (req, res) => {   
+    Games.findAll({ where: { owner_id: req.params.id } })
         .then(
             function findSuccess(data) {
                 res.status(200).json({
-                    games: games,
+                    games: data,
                     message: "Data fetched."
                 })
             },
@@ -20,7 +22,7 @@ router.get('/all', (req, res) => {
 })
 
 router.get('/:id', (req, res) => {
-    Game.findOne({ where: { id: req.params.id, owner_id: req.user.id } })
+    Games.findOne({ where: { id: req.params.id, owner_id: req.user.id } })
         .then(
             function findSuccess(game) {
                 res.status(200).json({
@@ -37,7 +39,7 @@ router.get('/:id', (req, res) => {
 })
 
 router.post('/create', (req, res) => {
-    Game.create({
+    Games.create({
         title: req.body.game.title,
         owner_id: req.body.user.id,
         studio: req.body.game.studio,
@@ -60,7 +62,7 @@ router.post('/create', (req, res) => {
 })
 
 router.put('/update/:id', (req, res) => {
-    Game.update({
+    Games.update({
         title: req.body.game.title,
         studio: req.body.game.studio,
         esrb_rating: req.body.game.esrb_rating,
@@ -91,7 +93,7 @@ router.put('/update/:id', (req, res) => {
 })
 
 router.delete('/remove/:id', (req, res) => {
-    Game.destroy({
+    Games.destroy({
         where: {
             id: req.params.id,
             owner_id: req.user.id
@@ -113,4 +115,4 @@ router.delete('/remove/:id', (req, res) => {
     )
 })
 
-module.exports = routers;
+module.exports = router;
